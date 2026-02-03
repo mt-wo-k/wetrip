@@ -10,25 +10,7 @@ export default function Home() {
   const trips = getTrips();
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-2 pt-20">
-      <div className="fixed inset-0 z-20">
-        <div className="mx-auto w-full max-w-6xl">
-          <div className="bg-background">
-            <div className="px-24 py-2">
-              <div className="relative aspect-[5/1] w-full overflow-hidden rounded-xl">
-                <Image
-                  src="/banner.png"
-                  alt="WeTrip banner"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">旅行一覧</h1>
@@ -51,7 +33,6 @@ export default function Home() {
               </div>
               <div className="absolute inset-0 bg-black/45" />
               <div className="absolute inset-x-0 bottom-0 p-4">
-                <p className="text-xs text-white/70">{trip.destination}</p>
                 <h2 className="text-lg font-semibold text-white">
                   {trip.title}
                 </h2>
@@ -60,7 +41,7 @@ export default function Home() {
             <CardContent className="space-y-3 pt-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  {trip.startDate} - {trip.endDate}
+                  {trip.startDate} ~ {trip.endDate}
                 </p>
                 <Badge variant="secondary">{trip.transportation}</Badge>
               </div>

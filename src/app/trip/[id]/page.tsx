@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -36,24 +35,6 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <Card className="overflow-hidden">
-          <div className="relative aspect-[16/9] w-full">
-            <Image
-              src={trip.coverImagePath}
-              alt={trip.title}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 66vw, 100vw"
-              priority
-            />
-            <div className="absolute inset-0 bg-black/35" />
-            <div className="absolute inset-x-0 bottom-0 p-4">
-              <p className="text-xs text-white/70">{trip.destination}</p>
-              <h2 className="text-xl font-semibold text-white">{trip.title}</h2>
-            </div>
-          </div>
-        </Card>
-
         <Card>
           <CardHeader>
             <CardTitle>旅行詳細</CardTitle>

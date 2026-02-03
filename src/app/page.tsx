@@ -10,10 +10,27 @@ export default function Home() {
   const trips = getTrips();
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 pb-2 pt-20">
+      <div className="fixed inset-0 z-20">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="bg-background">
+            <div className="px-24 py-2">
+              <div className="relative aspect-[5/1] w-full overflow-hidden rounded-xl">
+                <Image
+                  src="/banner.png"
+                  alt="WeTrip banner"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">WeTrip</p>
           <h1 className="text-3xl font-semibold tracking-tight">旅行一覧</h1>
         </div>
         <Button variant="secondary">新しい旅行を計画</Button>

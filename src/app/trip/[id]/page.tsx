@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTripById } from "@/lib/trips";
+import { tripIdSchema } from "@/lib/schemas/trip";
+import { getSchedulesByTripId } from "@/lib/server/schedule-repository";
+import { getTripById } from "@/lib/server/trip-repository";
+import { TripScheduleSection } from "./trip-schedule-section";
 
 type TripDetailPageParams = { id: string };
 
@@ -14,7 +17,16 @@ type TripDetailPageProps = {
 
 export default async function TripDetailPage({ params }: TripDetailPageProps) {
   const resolvedParams = await Promise.resolve(params);
-  const trip = getTripById(resolvedParams.id);
+  const parsedId = tripIdSchema.safeParse(resolvedParams.id);
+
+  if (!parsedId.success) {
+    notFound();
+  }
+
+  const [trip, schedules] = await Promise.all([
+    getTripById(parsedId.data),
+    getSchedulesByTripId(parsedId.data),
+  ]);
 
   if (!trip) {
     notFound();
@@ -25,7 +37,7 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">
-            {trip.title}
+            旅行詳細
           </h1>
         </div>
         <Button asChild variant="secondary">
@@ -56,6 +68,8 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
           </CardContent>
         </Card>
       </div>
+
+      <TripScheduleSection trip={trip} initialSchedules={schedules} />
     </main>
   );
 }

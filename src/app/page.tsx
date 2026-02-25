@@ -1,13 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getTrips } from "@/lib/trips";
+import { getTrips } from "@/lib/server/trip-repository";
 
-export default function Home() {
-  const trips = getTrips();
+export default async function Home() {
+  const trips = await getTrips();
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6">
@@ -15,30 +14,25 @@ export default function Home() {
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">旅行一覧</h1>
         </div>
-        <Button variant="secondary">新しい旅行を計画</Button>
+        <div className="flex gap-2">
+          <Button asChild variant="secondary">
+            <Link href="/trip/new">新しい旅行を計画</Link>
+          </Button>
+        </div>
       </header>
 
       <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {trips.length === 0 ? (
+          <Card className="sm:col-span-2 lg:col-span-3">
+            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+              旅行データがまだありません。新しい旅行を追加してください。
+            </CardContent>
+          </Card>
+        ) : null}
         {trips.map((trip) => (
-          <Card key={trip.id} className="overflow-hidden">
-            <div className="relative">
-              <div className="relative aspect-[16/9] w-full">
-                <Image
-                  src={trip.coverImagePath}
-                  alt={trip.title}
-                  fill
-                  className="object-cover"
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                />
-              </div>
-              <div className="absolute inset-0 bg-black/45" />
-              <div className="absolute inset-x-0 bottom-0 p-4">
-                <h2 className="text-lg font-semibold text-white">
-                  {trip.title}
-                </h2>
-              </div>
-            </div>
+          <Card key={trip.id}>
             <CardContent className="space-y-3 pt-4">
+              <h2 className="text-lg font-semibold">{trip.destination}</h2>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
                   {trip.startDate} ~ {trip.endDate}

@@ -29,6 +29,7 @@ export function EditScheduleModal({
   const [editDayIndex, setEditDayIndex] = useState(1);
   const [editStartTime, setEditStartTime] = useState("");
   const [editEndTime, setEditEndTime] = useState("");
+  const [editMapLink, setEditMapLink] = useState("");
   const [editTitle, setEditTitle] = useState("");
   const [editDetail, setEditDetail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +47,7 @@ export function EditScheduleModal({
     setEditDayIndex(schedule.dayIndex);
     setEditStartTime(schedule.startTime);
     setEditEndTime(schedule.endTime ?? "");
+    setEditMapLink(schedule.mapLink ?? "");
     setEditTitle(schedule.title ?? schedule.name ?? "");
     setEditDetail(schedule.detail ?? "");
     setIsConfirmOpen(false);
@@ -76,6 +78,7 @@ export function EditScheduleModal({
             scheduleType: schedule.scheduleType,
             startTime: editStartTime,
             endTime: isHotel ? undefined : editEndTime,
+            mapLink: editMapLink,
             title: editTitle,
             detail: editDetail,
           }),
@@ -193,6 +196,20 @@ export function EditScheduleModal({
                   />
                 </div>
               ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="editMapLink">
+                Google Mapリンク（任意）
+              </label>
+              <input
+                id="editMapLink"
+                type="url"
+                value={editMapLink}
+                onChange={(event) => setEditMapLink(event.target.value)}
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                placeholder="https://maps.google.com/..."
+              />
             </div>
 
             <div className="space-y-2">

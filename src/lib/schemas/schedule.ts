@@ -5,6 +5,35 @@ import { scheduleTypeValues } from "@/lib/trips";
 
 const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
+function isGoogleMapsUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+
+    if (host === "maps.google.com" || host.endsWith(".maps.google.com")) {
+      return true;
+    }
+
+    if (host === "maps.app.goo.gl") {
+      return true;
+    }
+
+    if ((host === "google.com" || host === "www.google.com") && path.startsWith("/maps")) {
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+const googleMapsUrlSchema = z
+  .string()
+  .url("mapLink must be a valid URL")
+  .refine(isGoogleMapsUrl, "mapLink must be a Google Maps URL");
+
 export const scheduleIdSchema = z.string().uuid();
 export const scheduleTypeSchema = z.enum(scheduleTypeValues);
 
@@ -18,12 +47,14 @@ export const createScheduleSchema = z
       .regex(timePattern, "endTime must be HH:MM")
       .optional()
       .or(z.literal("")),
+    mapLink: googleMapsUrlSchema.optional().or(z.literal("")),
     title: z.string().trim().max(100).optional().or(z.literal("")),
     detail: z.string().trim().max(500).optional().or(z.literal("")),
   })
   .transform((value) => ({
     ...value,
     endTime: value.endTime || undefined,
+    mapLink: value.mapLink || undefined,
     title: value.title || undefined,
     detail: value.detail || undefined,
   }))
@@ -56,6 +87,7 @@ export const persistedScheduleSchema = z.object({
   scheduleType: scheduleTypeSchema.optional().default("food"),
   startTime: z.string().regex(timePattern),
   endTime: z.string().regex(timePattern).optional(),
+  mapLink: googleMapsUrlSchema.optional(),
   title: z.string().max(100).optional(),
   name: z.string().max(100).optional(),
   detail: z.string().max(500).optional(),
@@ -73,12 +105,14 @@ export const updateScheduleContentSchema = z
       .regex(timePattern, "endTime must be HH:MM")
       .optional()
       .or(z.literal("")),
+    mapLink: googleMapsUrlSchema.optional().or(z.literal("")),
     title: z.string().trim().max(100).optional().or(z.literal("")),
     detail: z.string().trim().max(500).optional().or(z.literal("")),
   })
   .transform((value) => ({
     ...value,
     endTime: value.endTime || undefined,
+    mapLink: value.mapLink || undefined,
     title: value.title || undefined,
     detail: value.detail || undefined,
   }))

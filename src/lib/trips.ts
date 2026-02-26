@@ -25,6 +25,7 @@ export type TripSchedule = {
   scheduleType: ScheduleType;
   startTime: string;
   endTime?: string;
+  mapLink?: string;
   title?: string;
   name?: string;
   detail?: string;

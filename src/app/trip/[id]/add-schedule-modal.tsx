@@ -29,6 +29,7 @@ export function AddScheduleModal({
   const [dayIndex, setDayIndex] = useState(initialDayIndex);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [mapLink, setMapLink] = useState("");
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +45,7 @@ export function AddScheduleModal({
     setDayIndex(initialDayIndex);
     setStartTime("");
     setEndTime("");
+    setMapLink("");
     setTitle("");
     setDetail("");
     setErrorMessage(null);
@@ -71,6 +73,7 @@ export function AddScheduleModal({
           scheduleType,
           startTime,
           endTime: isHotel ? undefined : endTime,
+          mapLink,
           title,
           detail,
         }),
@@ -151,6 +154,20 @@ export function AddScheduleModal({
                   />
                 </div>
               ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="mapLink">
+                Google Mapリンク（任意）
+              </label>
+              <input
+                id="mapLink"
+                type="url"
+                value={mapLink}
+                onChange={(event) => setMapLink(event.target.value)}
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                placeholder="https://maps.google.com/..."
+              />
             </div>
 
             <div className="space-y-2">

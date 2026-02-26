@@ -1,6 +1,6 @@
 "use client";
 
-import { Bed, CalendarClock, MapPinPen, Utensils } from "lucide-react";
+import { Bed, CalendarClock, MapPin, MapPinPen, Utensils } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +86,7 @@ export function TripScheduleTimelineSection({
                 <Icon className="h-4 w-4" />
                 <span className="text-[11px] leading-none">{label}</span>
               </Button>
-            )
+            ),
           )}
         </div>
 
@@ -131,35 +131,50 @@ export function TripScheduleTimelineSection({
                   <span className="absolute left-1/2 top-2 z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-[#8F1D3F]" />
                 </div>
                 <div className="space-y-2 pb-4">
-                  <button
-                    type="button"
-                    onClick={() => onOpenEditModal(item)}
-                    className={`relative w-full rounded-md border-2 bg-background p-3 text-left hover:bg-muted/40 ${
-                      scheduleCardBorderClass[item.scheduleType]
-                    }`}
-                  >
-                    <p
-                      className={`absolute -top-3 left-2 rounded-full border-2 bg-background px-2 text-sm font-semibold text-muted-foreground ${
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => onOpenEditModal(item)}
+                      className={`relative w-full rounded-md border-2 bg-background p-3 pr-10 text-left hover:bg-muted/40 ${
                         scheduleCardBorderClass[item.scheduleType]
                       }`}
                     >
-                      {item.endTime
-                        ? `${item.startTime}〜${item.endTime}`
-                        : item.startTime}
-                    </p>
-                    <p className="text-base font-semibold">
-                      {item.title?.trim() || item.name?.trim() || item.scheduleType}
-                    </p>
-                    {item.detail ? (
-                      <p className="whitespace-pre-wrap text-xs text-muted-foreground pl-1">
-                        {item.detail}
+                      <p
+                        className={`absolute -top-3 left-2 rounded-full border-2 bg-background px-2 text-sm font-semibold text-muted-foreground ${
+                          scheduleCardBorderClass[item.scheduleType]
+                        }`}
+                      >
+                        {item.endTime
+                          ? `${item.startTime}〜${item.endTime}`
+                          : item.startTime}
                       </p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground">
-                        メモなし（タップして編集）
+                      <p className="text-base font-semibold">
+                        {item.title?.trim() ||
+                          item.name?.trim() ||
+                          item.scheduleType}
                       </p>
-                    )}
-                  </button>
+                      {item.detail ? (
+                        <p className="whitespace-pre-wrap text-xs text-muted-foreground pl-1">
+                          {item.detail}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          メモなし（タップして編集）
+                        </p>
+                      )}
+                    </button>
+                    {item.mapLink ? (
+                      <a
+                        href={item.mapLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="mapを表示"
+                        className="absolute bottom-0 right-0 rounded-full p-2 text-green-700 hover:text-green-800"
+                      >
+                        <MapPin className="h-5 w-5" />
+                      </a>
+                    ) : null}
+                  </div>
                 </div>
               </div>
             ))

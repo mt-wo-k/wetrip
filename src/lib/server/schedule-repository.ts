@@ -34,6 +34,7 @@ export async function createSchedule({
     scheduleType: input.scheduleType,
     startTime: input.startTime,
     endTime: input.endTime,
+    mapLink: input.mapLink,
     title: input.title,
     detail: input.detail,
     createdAt: now,
@@ -110,6 +111,7 @@ export async function updateScheduleContent({
     "#dayIndex": "dayIndex",
     "#startTime": "startTime",
     "#endTime": "endTime",
+    "#mapLink": "mapLink",
     "#title": "title",
     "#detail": "detail",
   };
@@ -127,6 +129,13 @@ export async function updateScheduleContent({
     expressionAttributeValues[":endTime"] = input.endTime;
   } else {
     removeExpressions.push("#endTime");
+  }
+
+  if (input.mapLink !== undefined) {
+    setExpressions.push("#mapLink = :mapLink");
+    expressionAttributeValues[":mapLink"] = input.mapLink;
+  } else {
+    removeExpressions.push("#mapLink");
   }
 
   if (input.title !== undefined) {

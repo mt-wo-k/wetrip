@@ -37,8 +37,6 @@ export function EditScheduleModal({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const isHotel = schedule?.scheduleType === "hotel";
-
   useEffect(() => {
     if (!isOpen || !schedule) {
       return;
@@ -46,13 +44,22 @@ export function EditScheduleModal({
 
     setEditDayIndex(schedule.dayIndex);
     setEditStartTime(schedule.startTime);
-    setEditEndTime(schedule.endTime ?? "");
+    setEditEndTime(schedule.endTime ?? schedule.startTime);
     setEditMapLink(schedule.mapLink ?? "");
     setEditTitle(schedule.title ?? schedule.name ?? "");
     setEditDetail(schedule.detail ?? "");
     setIsConfirmOpen(false);
     setErrorMessage(null);
   }, [isOpen, schedule]);
+
+  function handleStartTimeChange(nextStartTime: string) {
+    const previousStartTime = editStartTime;
+    setEditStartTime(nextStartTime);
+
+    if (editEndTime === "" || editEndTime === previousStartTime) {
+      setEditEndTime(nextStartTime);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -77,7 +84,7 @@ export function EditScheduleModal({
             dayIndex: editDayIndex,
             scheduleType: schedule.scheduleType,
             startTime: editStartTime,
-            endTime: isHotel ? undefined : editEndTime,
+            endTime: editEndTime,
             mapLink: editMapLink,
             title: editTitle,
             detail: editDetail,
@@ -146,7 +153,7 @@ export function EditScheduleModal({
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="editDayIndex">
                 日にち
               </label>
@@ -156,7 +163,7 @@ export function EditScheduleModal({
                 onChange={(event) =>
                   setEditDayIndex(Number(event.target.value))
                 }
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                className="w-fit min-w-30 rounded-md border border-border bg-transparent px-3 py-2 text-base"
               >
                 {dayTabs.map((day) => (
                   <option key={day} value={day}>
@@ -166,39 +173,40 @@ export function EditScheduleModal({
               </select>
             </div>
 
-            <div
-              className={isHotel ? "space-y-2" : "grid gap-4 sm:grid-cols-2"}
-            >
-              <div className="space-y-2">
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium" htmlFor="editStartTime">
-                  {isHotel ? "チェックイン" : "開始時間"}
+                  開始時間
                 </label>
                 <input
                   id="editStartTime"
                   type="time"
+                  step={300}
                   required
                   value={editStartTime}
-                  onChange={(event) => setEditStartTime(event.target.value)}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                  onChange={(event) =>
+                    handleStartTimeChange(event.target.value)
+                  }
+                  className="w-fit min-w-30 rounded-md border border-border bg-transparent px-3 py-2 text-base"
                 />
               </div>
-              {!isHotel ? (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="editEndTime">
-                    終了時間（任意）
-                  </label>
-                  <input
-                    id="editEndTime"
-                    type="time"
-                    value={editEndTime}
-                    onChange={(event) => setEditEndTime(event.target.value)}
-                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
-                  />
-                </div>
-              ) : null}
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="editEndTime">
+                  終了時間
+                </label>
+                <input
+                  id="editEndTime"
+                  type="time"
+                  step={300}
+                  required
+                  value={editEndTime}
+                  onChange={(event) => setEditEndTime(event.target.value)}
+                  className="w-fit min-w-30 rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="editMapLink">
                 Google Mapリンク（任意）
               </label>
@@ -212,7 +220,7 @@ export function EditScheduleModal({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="editTitle">
                 タイトル
               </label>
@@ -224,9 +232,9 @@ export function EditScheduleModal({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="editDetail">
-                メモ
+                メモ（任意）
               </label>
               <textarea
                 id="editDetail"

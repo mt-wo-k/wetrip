@@ -42,36 +42,19 @@ export const createScheduleSchema = z
     dayIndex: z.number().int().min(1),
     scheduleType: scheduleTypeSchema,
     startTime: z.string().regex(timePattern, "startTime must be HH:MM"),
-    endTime: z
-      .string()
-      .regex(timePattern, "endTime must be HH:MM")
-      .optional()
-      .or(z.literal("")),
+    endTime: z.string().regex(timePattern, "endTime must be HH:MM"),
     mapLink: googleMapsUrlSchema.optional().or(z.literal("")),
     title: z.string().trim().max(100).optional().or(z.literal("")),
     detail: z.string().trim().max(500).optional().or(z.literal("")),
   })
   .transform((value) => ({
     ...value,
-    endTime: value.endTime || undefined,
     mapLink: value.mapLink || undefined,
     title: value.title || undefined,
     detail: value.detail || undefined,
   }))
   .superRefine((value, context) => {
-    if (value.scheduleType === "hotel" && value.endTime) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["endTime"],
-        message: "endTime is not allowed for hotel",
-      });
-    }
-
-    if (
-      value.scheduleType !== "hotel" &&
-      value.endTime &&
-      value.endTime < value.startTime
-    ) {
+    if (value.endTime < value.startTime) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["endTime"],
@@ -100,36 +83,19 @@ export const updateScheduleContentSchema = z
     dayIndex: z.number().int().min(1),
     scheduleType: scheduleTypeSchema,
     startTime: z.string().regex(timePattern, "startTime must be HH:MM"),
-    endTime: z
-      .string()
-      .regex(timePattern, "endTime must be HH:MM")
-      .optional()
-      .or(z.literal("")),
+    endTime: z.string().regex(timePattern, "endTime must be HH:MM"),
     mapLink: googleMapsUrlSchema.optional().or(z.literal("")),
     title: z.string().trim().max(100).optional().or(z.literal("")),
     detail: z.string().trim().max(500).optional().or(z.literal("")),
   })
   .transform((value) => ({
     ...value,
-    endTime: value.endTime || undefined,
     mapLink: value.mapLink || undefined,
     title: value.title || undefined,
     detail: value.detail || undefined,
   }))
   .superRefine((value, context) => {
-    if (value.scheduleType === "hotel" && value.endTime) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["endTime"],
-        message: "endTime is not allowed for hotel",
-      });
-    }
-
-    if (
-      value.scheduleType !== "hotel" &&
-      value.endTime &&
-      value.endTime < value.startTime
-    ) {
+    if (value.endTime < value.startTime) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["endTime"],

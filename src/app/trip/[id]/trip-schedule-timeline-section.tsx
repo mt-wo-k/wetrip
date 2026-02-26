@@ -1,6 +1,13 @@
 "use client";
 
-import { Bed, CalendarClock, MapPin, MapPinPen, Utensils } from "lucide-react";
+import {
+  Bus,
+  CalendarClock,
+  MapPin,
+  MapPinPen,
+  Utensils,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,17 +25,10 @@ type TripScheduleTimelineSectionProps = {
 const addTypeButtons: Array<{
   type: ScheduleType;
   label: string;
-  Icon: typeof Bed;
+  Icon: LucideIcon;
   colorClassName: string;
   borderClassName: string;
 }> = [
-  {
-    type: "hotel",
-    label: "hotel",
-    Icon: Bed,
-    colorClassName: "text-blue-900",
-    borderClassName: "border-blue-900",
-  },
   {
     type: "food",
     label: "food",
@@ -44,6 +44,13 @@ const addTypeButtons: Array<{
     borderClassName: "border-red-900",
   },
   {
+    type: "move",
+    label: "move",
+    Icon: Bus,
+    colorClassName: "text-blue-700",
+    borderClassName: "border-blue-700",
+  },
+  {
     type: "event",
     label: "event",
     Icon: CalendarClock,
@@ -53,11 +60,19 @@ const addTypeButtons: Array<{
 ];
 
 const scheduleCardBorderClass: Record<ScheduleType, string> = {
-  hotel: "border-blue-900",
   food: "border-green-900",
   spot: "border-red-900",
+  move: "border-blue-700",
   event: "border-slate-900",
 };
+
+function formatScheduleTime(startTime: string, endTime?: string): string {
+  if (!endTime || startTime === endTime) {
+    return startTime;
+  }
+
+  return `${startTime} ~ ${endTime}`;
+}
 
 export function TripScheduleTimelineSection({
   dayTabs,
@@ -144,9 +159,7 @@ export function TripScheduleTimelineSection({
                           scheduleCardBorderClass[item.scheduleType]
                         }`}
                       >
-                        {item.endTime
-                          ? `${item.startTime}〜${item.endTime}`
-                          : item.startTime}
+                        {formatScheduleTime(item.startTime, item.endTime)}
                       </p>
                       <p className="text-base font-semibold">
                         {item.title?.trim() ||

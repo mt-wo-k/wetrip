@@ -15,7 +15,7 @@ export type CreateTripInput = Omit<
   "id" | "createdAt" | "updatedAt" | "createdBySub"
 >;
 
-export const scheduleTypeValues = ["hotel", "food", "spot", "event"] as const;
+export const scheduleTypeValues = ["food", "spot", "move", "event"] as const;
 export type ScheduleType = (typeof scheduleTypeValues)[number];
 
 export type TripSchedule = {

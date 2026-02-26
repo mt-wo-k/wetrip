@@ -27,15 +27,13 @@ export function AddScheduleModal({
   onCreated,
 }: AddScheduleModalProps) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex);
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [startTime, setStartTime] = useState("00:00");
+  const [endTime, setEndTime] = useState("00:00");
   const [mapLink, setMapLink] = useState("");
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const isHotel = scheduleType === "hotel";
 
   useEffect(() => {
     if (!isOpen || !scheduleType) {
@@ -43,13 +41,22 @@ export function AddScheduleModal({
     }
 
     setDayIndex(initialDayIndex);
-    setStartTime("");
-    setEndTime("");
+    setStartTime("00:00");
+    setEndTime("00:00");
     setMapLink("");
     setTitle("");
     setDetail("");
     setErrorMessage(null);
   }, [isOpen, initialDayIndex, scheduleType]);
+
+  function handleStartTimeChange(nextStartTime: string) {
+    const previousStartTime = startTime;
+    setStartTime(nextStartTime);
+
+    if (endTime === "" || endTime === previousStartTime) {
+      setEndTime(nextStartTime);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,7 +79,7 @@ export function AddScheduleModal({
           dayIndex,
           scheduleType,
           startTime,
-          endTime: isHotel ? undefined : endTime,
+          endTime,
           mapLink,
           title,
           detail,
@@ -106,7 +113,7 @@ export function AddScheduleModal({
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="dayIndex">
                 日にち
               </label>
@@ -114,7 +121,7 @@ export function AddScheduleModal({
                 id="dayIndex"
                 value={dayIndex}
                 onChange={(event) => setDayIndex(Number(event.target.value))}
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                className="w-fit min-w-30 rounded-md border border-border bg-transparent px-3 py-2 text-base"
               >
                 {dayTabs.map((day) => (
                   <option key={day} value={day}>
@@ -124,39 +131,40 @@ export function AddScheduleModal({
               </select>
             </div>
 
-            <div
-              className={isHotel ? "space-y-2" : "grid gap-4 sm:grid-cols-2"}
-            >
-              <div className="space-y-2">
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium" htmlFor="startTime">
-                  {isHotel ? "チェックイン" : "開始時間"}
+                  開始時間
                 </label>
                 <input
                   id="startTime"
                   type="time"
+                  step={300}
                   required
                   value={startTime}
-                  onChange={(event) => setStartTime(event.target.value)}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                  onChange={(event) =>
+                    handleStartTimeChange(event.target.value)
+                  }
+                  className="w-fit min-w-30 rounded-md border border-border bg-transparent px-3 py-2 text-base"
                 />
               </div>
-              {!isHotel ? (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="endTime">
-                    終了時間（任意）
-                  </label>
-                  <input
-                    id="endTime"
-                    type="time"
-                    value={endTime}
-                    onChange={(event) => setEndTime(event.target.value)}
-                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
-                  />
-                </div>
-              ) : null}
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="endTime">
+                  終了時間
+                </label>
+                <input
+                  id="endTime"
+                  type="time"
+                  step={300}
+                  required
+                  value={endTime}
+                  onChange={(event) => setEndTime(event.target.value)}
+                  className="w-fit min-w-30 rounded-md border border-border bg-transparent px-3 py-2 text-base"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="mapLink">
                 Google Mapリンク（任意）
               </label>
@@ -170,7 +178,7 @@ export function AddScheduleModal({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="title">
                 タイトル
               </label>
@@ -182,9 +190,9 @@ export function AddScheduleModal({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-1">
               <label className="text-sm font-medium" htmlFor="detail">
-                メモ
+                メモ（任意）
               </label>
               <textarea
                 id="detail"

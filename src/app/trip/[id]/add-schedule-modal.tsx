@@ -100,9 +100,6 @@ export function AddScheduleModal({
       <Card className="w-full max-w-2xl">
         <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle>{scheduleType} を追加</CardTitle>
-          <Button type="button" variant="ghost" onClick={onClose}>
-            閉じる
-          </Button>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>

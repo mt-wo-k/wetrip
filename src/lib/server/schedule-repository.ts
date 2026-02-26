@@ -1,4 +1,10 @@
-import { PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  BatchWriteCommand,
+  DeleteCommand,
+  PutCommand,
+  QueryCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "node:crypto";
 
 import {
@@ -169,4 +175,82 @@ export async function updateScheduleContent({
   }
 
   return validated.data;
+}
+
+export async function deleteSchedulesByTripId(tripId: string): Promise<number> {
+  let lastEvaluatedKey: Record<string, unknown> | undefined;
+  let deletedCount = 0;
+
+  do {
+    const response = await dynamoDbDocumentClient.send(
+      new QueryCommand({
+        TableName: serverEnv.dynamoDbTripSchedulesTable,
+        KeyConditionExpression: "#tripId = :tripId",
+        ExpressionAttributeNames: {
+          "#tripId": "tripId",
+        },
+        ExpressionAttributeValues: {
+          ":tripId": tripId,
+        },
+        ExclusiveStartKey: lastEvaluatedKey,
+      }),
+    );
+
+    const items = response.Items ?? [];
+    if (items.length > 0) {
+      for (let index = 0; index < items.length; index += 25) {
+        const chunk = items.slice(index, index + 25);
+        let pendingItems = chunk.map((item) => ({
+          DeleteRequest: {
+            Key: {
+              tripId: item.tripId,
+              scheduleId: item.scheduleId,
+            },
+          },
+        }));
+
+        while (pendingItems.length > 0) {
+          const batchResponse = await dynamoDbDocumentClient.send(
+            new BatchWriteCommand({
+              RequestItems: {
+                [serverEnv.dynamoDbTripSchedulesTable]: pendingItems,
+              },
+            }),
+          );
+
+          pendingItems =
+            batchResponse.UnprocessedItems?.[serverEnv.dynamoDbTripSchedulesTable] ??
+            [];
+        }
+
+        deletedCount += chunk.length;
+      }
+    }
+
+    lastEvaluatedKey = response.LastEvaluatedKey;
+  } while (lastEvaluatedKey);
+
+  return deletedCount;
+}
+
+export async function deleteScheduleById({
+  tripId,
+  scheduleId,
+}: {
+  tripId: string;
+  scheduleId: string;
+}): Promise<boolean> {
+  const response = await dynamoDbDocumentClient.send(
+    new DeleteCommand({
+      TableName: serverEnv.dynamoDbTripSchedulesTable,
+      Key: {
+        tripId,
+        scheduleId,
+      },
+      ConditionExpression: "attribute_exists(tripId) AND attribute_exists(scheduleId)",
+      ReturnValues: "ALL_OLD",
+    }),
+  );
+
+  return Boolean(response.Attributes);
 }

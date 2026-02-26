@@ -14,6 +14,7 @@ type EditScheduleModalProps = {
   schedule: TripSchedule | null;
   onClose: () => void;
   onUpdated: (updated: TripSchedule) => void;
+  onDeleted: (deletedScheduleId: string) => void;
 };
 
 export function EditScheduleModal({
@@ -23,6 +24,7 @@ export function EditScheduleModal({
   schedule,
   onClose,
   onUpdated,
+  onDeleted,
 }: EditScheduleModalProps) {
   const [editDayIndex, setEditDayIndex] = useState(1);
   const [editStartTime, setEditStartTime] = useState("");
@@ -30,6 +32,8 @@ export function EditScheduleModal({
   const [editTitle, setEditTitle] = useState("");
   const [editDetail, setEditDetail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isHotel = schedule?.scheduleType === "hotel";
@@ -44,6 +48,7 @@ export function EditScheduleModal({
     setEditEndTime(schedule.endTime ?? "");
     setEditTitle(schedule.title ?? schedule.name ?? "");
     setEditDetail(schedule.detail ?? "");
+    setIsConfirmOpen(false);
     setErrorMessage(null);
   }, [isOpen, schedule]);
 
@@ -92,6 +97,40 @@ export function EditScheduleModal({
     }
   }
 
+  async function handleDelete() {
+    if (!schedule) {
+      setErrorMessage("削除対象の予定が見つかりません");
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(
+        `/api/trips/${tripId}/schedules/${schedule.scheduleId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        setErrorMessage(payload?.error ?? "予定の削除に失敗しました");
+        return;
+      }
+
+      onDeleted(schedule.scheduleId);
+    } catch {
+      setErrorMessage("通信に失敗しました。時間をおいて再試行してください。");
+    } finally {
+      setIsDeleting(false);
+      setIsConfirmOpen(false);
+    }
+  }
+
   if (!isOpen) {
     return null;
   }
@@ -100,10 +139,7 @@ export function EditScheduleModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="flex flex-row items-center justify-between gap-2">
-          <CardTitle>{schedule?.scheduleType} を編集</CardTitle>
-          <Button type="button" variant="ghost" onClick={onClose}>
-            閉じる
-          </Button>
+          <CardTitle>{schedule?.title} を編集</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -114,7 +150,9 @@ export function EditScheduleModal({
               <select
                 id="editDayIndex"
                 value={editDayIndex}
-                onChange={(event) => setEditDayIndex(Number(event.target.value))}
+                onChange={(event) =>
+                  setEditDayIndex(Number(event.target.value))
+                }
                 className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
               >
                 {dayTabs.map((day) => (
@@ -125,7 +163,9 @@ export function EditScheduleModal({
               </select>
             </div>
 
-            <div className={isHotel ? "space-y-2" : "grid gap-4 sm:grid-cols-2"}>
+            <div
+              className={isHotel ? "space-y-2" : "grid gap-4 sm:grid-cols-2"}
+            >
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="editStartTime">
                   {isHotel ? "チェックイン" : "開始時間"}
@@ -179,19 +219,72 @@ export function EditScheduleModal({
               />
             </div>
 
-            {errorMessage ? <p className="text-sm text-red-500">{errorMessage}</p> : null}
+            {errorMessage ? (
+              <p className="text-sm text-red-500">{errorMessage}</p>
+            ) : null}
 
-            <div className="flex gap-2">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "更新中..." : "保存する"}
-              </Button>
-              <Button type="button" variant="outline" onClick={onClose}>
-                キャンセル
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                <Button type="submit" disabled={isSubmitting || isDeleting}>
+                  {isSubmitting ? "更新中..." : "保存する"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isSubmitting || isDeleting}
+                >
+                  キャンセル
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-auto px-0 py-0 text-xs text-muted-foreground underline underline-offset-4 hover:bg-transparent hover:text-foreground"
+                onClick={() => setIsConfirmOpen(true)}
+                disabled={isSubmitting || isDeleting}
+              >
+                予定を削除
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
+      {isConfirmOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="text-lg">
+                この予定を削除しますか？
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                この操作は元に戻せません。
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsConfirmOpen(false)}
+                  disabled={isDeleting}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "削除中..." : "削除する"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
     </div>
   );
 }

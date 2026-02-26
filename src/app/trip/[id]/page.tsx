@@ -8,6 +8,7 @@ import { tripIdSchema } from "@/lib/schemas/trip";
 import { getSchedulesByTripId } from "@/lib/server/schedule-repository";
 import { getTripById } from "@/lib/server/trip-repository";
 import { formatDateForDisplay } from "@/lib/utils";
+import { DeleteTripButton } from "./delete-trip-button";
 import { TripScheduleSection } from "./trip-schedule-section";
 
 type TripDetailPageParams = { id: string };
@@ -66,6 +67,8 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
       </div>
 
       <TripScheduleSection trip={trip} initialSchedules={schedules} />
+
+      <DeleteTripButton tripId={trip.id} />
     </main>
   );
 }

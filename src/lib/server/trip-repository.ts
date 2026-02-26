@@ -1,4 +1,9 @@
-import { GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DeleteCommand,
+  GetCommand,
+  PutCommand,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "node:crypto";
 
 import { persistedTripSchema, type CreateTripSchema } from "@/lib/schemas/trip";
@@ -90,4 +95,17 @@ export async function getTrips(): Promise<Trip[]> {
   }
 
   return trips.sort((a, b) => b.startDate.localeCompare(a.startDate));
+}
+
+export async function deleteTripById(id: string): Promise<boolean> {
+  const response = await dynamoDbDocumentClient.send(
+    new DeleteCommand({
+      TableName: serverEnv.dynamoDbTripsTable,
+      Key: { id },
+      ConditionExpression: "attribute_exists(id)",
+      ReturnValues: "ALL_OLD",
+    }),
+  );
+
+  return Boolean(response.Attributes);
 }

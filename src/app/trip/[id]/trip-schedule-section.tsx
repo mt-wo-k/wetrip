@@ -89,6 +89,12 @@ export function TripScheduleSection({
           );
           setEditingSchedule(null);
         }}
+        onDeleted={(deletedScheduleId) => {
+          setSchedules((current) =>
+            current.filter((item) => item.scheduleId !== deletedScheduleId),
+          );
+          setEditingSchedule(null);
+        }}
       />
     </>
   );

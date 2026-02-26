@@ -11,6 +11,8 @@ import { formatDateForDisplay } from "@/lib/utils";
 import { DeleteTripButton } from "./delete-trip-button";
 import { TripScheduleSection } from "./trip-schedule-section";
 
+export const dynamic = "force-dynamic";
+
 type TripDetailPageParams = { id: string };
 
 type TripDetailPageProps = {

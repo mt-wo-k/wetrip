@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getTrips } from "@/lib/server/trip-repository";
 import { formatDateForDisplay } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const trips = await getTrips();
 

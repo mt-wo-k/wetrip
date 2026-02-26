@@ -111,7 +111,7 @@ export function AddScheduleModal({
                 id="dayIndex"
                 value={dayIndex}
                 onChange={(event) => setDayIndex(Number(event.target.value))}
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
               >
                 {dayTabs.map((day) => (
                   <option key={day} value={day}>
@@ -134,7 +134,7 @@ export function AddScheduleModal({
                   required
                   value={startTime}
                   onChange={(event) => setStartTime(event.target.value)}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                 />
               </div>
               {!isHotel ? (
@@ -147,7 +147,7 @@ export function AddScheduleModal({
                     type="time"
                     value={endTime}
                     onChange={(event) => setEndTime(event.target.value)}
-                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                   />
                 </div>
               ) : null}
@@ -161,7 +161,7 @@ export function AddScheduleModal({
                 id="title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
               />
             </div>
 
@@ -173,7 +173,7 @@ export function AddScheduleModal({
                 id="detail"
                 value={detail}
                 onChange={(event) => setDetail(event.target.value)}
-                className="min-h-24 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="min-h-24 w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
               />
             </div>
 

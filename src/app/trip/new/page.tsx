@@ -74,7 +74,7 @@ export default function NewTripPage() {
                 旅行先
               </label>
               <input
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                 id="destination"
                 required
                 value={destination}
@@ -88,7 +88,7 @@ export default function NewTripPage() {
                   開始日
                 </label>
                 <input
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                   id="startDate"
                   required
                   type="date"
@@ -101,7 +101,7 @@ export default function NewTripPage() {
                   終了日
                 </label>
                 <input
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                   id="endDate"
                   required
                   type="date"
@@ -116,7 +116,7 @@ export default function NewTripPage() {
                 移動手段
               </label>
               <input
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                 id="transportation"
                 required
                 value={transportation}

@@ -97,7 +97,7 @@ export function TripMemoSection({ tripId, initialMemo }: TripMemoSectionProps) {
             setMemo(event.target.value);
             setSaveStatus("idle");
           }}
-          className="min-h-32 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+          className="min-h-32 w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
           placeholder="旅行メモを入力"
         />
         <div className="flex justify-end">

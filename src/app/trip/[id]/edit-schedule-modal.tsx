@@ -153,7 +153,7 @@ export function EditScheduleModal({
                 onChange={(event) =>
                   setEditDayIndex(Number(event.target.value))
                 }
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
               >
                 {dayTabs.map((day) => (
                   <option key={day} value={day}>
@@ -176,7 +176,7 @@ export function EditScheduleModal({
                   required
                   value={editStartTime}
                   onChange={(event) => setEditStartTime(event.target.value)}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                 />
               </div>
               {!isHotel ? (
@@ -189,7 +189,7 @@ export function EditScheduleModal({
                     type="time"
                     value={editEndTime}
                     onChange={(event) => setEditEndTime(event.target.value)}
-                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
                   />
                 </div>
               ) : null}
@@ -203,7 +203,7 @@ export function EditScheduleModal({
                 id="editTitle"
                 value={editTitle}
                 onChange={(event) => setEditTitle(event.target.value)}
-                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
               />
             </div>
 
@@ -215,7 +215,7 @@ export function EditScheduleModal({
                 id="editDetail"
                 value={editDetail}
                 onChange={(event) => setEditDetail(event.target.value)}
-                className="min-h-24 w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                className="min-h-24 w-full rounded-md border border-border bg-transparent px-3 py-2 text-base"
               />
             </div>
 

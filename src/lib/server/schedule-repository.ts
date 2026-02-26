@@ -1,5 +1,6 @@
 import {
   BatchWriteCommand,
+  type BatchWriteCommandInput,
   DeleteCommand,
   PutCommand,
   QueryCommand,
@@ -200,7 +201,9 @@ export async function deleteSchedulesByTripId(tripId: string): Promise<number> {
     if (items.length > 0) {
       for (let index = 0; index < items.length; index += 25) {
         const chunk = items.slice(index, index + 25);
-        let pendingItems = chunk.map((item) => ({
+        let pendingItems: NonNullable<
+          BatchWriteCommandInput["RequestItems"]
+        >[string] = chunk.map((item) => ({
           DeleteRequest: {
             Key: {
               tripId: item.tripId,

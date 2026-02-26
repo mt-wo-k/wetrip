@@ -3,10 +3,15 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "node:crypto";
 
-import { persistedTripSchema, type CreateTripSchema } from "@/lib/schemas/trip";
+import {
+  persistedTripSchema,
+  type CreateTripSchema,
+  type UpdateTripMemoSchema,
+} from "@/lib/schemas/trip";
 import { dynamoDbDocumentClient } from "@/lib/server/dynamodb";
 import { serverEnv } from "@/lib/server/env";
 import type { Trip } from "@/lib/trips";
@@ -108,4 +113,50 @@ export async function deleteTripById(id: string): Promise<boolean> {
   );
 
   return Boolean(response.Attributes);
+}
+
+export async function updateTripMemo({
+  id,
+  input,
+}: {
+  id: string;
+  input: UpdateTripMemoSchema;
+}): Promise<Trip> {
+  const now = new Date().toISOString();
+  const hasMemo = input.memo !== undefined;
+  const response = await dynamoDbDocumentClient.send(
+    new UpdateCommand({
+      TableName: serverEnv.dynamoDbTripsTable,
+      Key: { id },
+      UpdateExpression: hasMemo
+        ? "SET #memo = :memo, #updatedAt = :updatedAt"
+        : "SET #updatedAt = :updatedAt REMOVE #memo",
+      ExpressionAttributeNames: {
+        "#memo": "memo",
+        "#updatedAt": "updatedAt",
+      },
+      ExpressionAttributeValues: hasMemo
+        ? {
+            ":memo": input.memo,
+            ":updatedAt": now,
+          }
+        : {
+            ":updatedAt": now,
+          },
+      ConditionExpression: "attribute_exists(id)",
+      ReturnValues: "ALL_NEW",
+    }),
+  );
+
+  if (!response.Attributes) {
+    throw new Error("Trip not found");
+  }
+
+  const validated = persistedTripSchema.safeParse(response.Attributes);
+
+  if (!validated.success) {
+    throw new Error("Updated trip item shape is invalid in DynamoDB");
+  }
+
+  return validated.data;
 }

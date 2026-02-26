@@ -4,6 +4,7 @@ export type Trip = {
   startDate: string;
   endDate: string;
   transportation: string;
+  memo?: string;
   createdAt?: string;
   updatedAt?: string;
   createdBySub?: string;

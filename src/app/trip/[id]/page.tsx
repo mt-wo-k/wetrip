@@ -9,6 +9,7 @@ import { getSchedulesByTripId } from "@/lib/server/schedule-repository";
 import { getTripById } from "@/lib/server/trip-repository";
 import { formatDateForDisplay } from "@/lib/utils";
 import { DeleteTripButton } from "./delete-trip-button";
+import { TripMemoSection } from "./trip-memo-section";
 import { TripScheduleSection } from "./trip-schedule-section";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,7 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
       </div>
 
       <TripScheduleSection trip={trip} initialSchedules={schedules} />
+      <TripMemoSection tripId={trip.id} initialMemo={trip.memo} />
 
       <DeleteTripButton tripId={trip.id} />
     </main>

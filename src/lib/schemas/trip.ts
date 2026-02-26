@@ -10,6 +10,7 @@ export const createTripSchema = z
     startDate: z.string().regex(isoDatePattern, "startDate must be YYYY-MM-DD"),
     endDate: z.string().regex(isoDatePattern, "endDate must be YYYY-MM-DD"),
     transportation: z.string().min(1).max(50),
+    memo: z.string().max(2000).optional(),
   })
   .superRefine((value, context) => {
     if (value.endDate < value.startDate) {
@@ -21,6 +22,14 @@ export const createTripSchema = z
     }
   });
 
+export const updateTripMemoSchema = z
+  .object({
+    memo: z.string().max(2000),
+  })
+  .transform((value) => ({
+    memo: value.memo === "" ? undefined : value.memo,
+  }));
+
 export const persistedTripSchema = createTripSchema.extend({
   id: tripIdSchema,
   createdAt: z.string().datetime(),
@@ -30,3 +39,4 @@ export const persistedTripSchema = createTripSchema.extend({
 
 export type CreateTripSchema = z.infer<typeof createTripSchema>;
 export type PersistedTripSchema = z.infer<typeof persistedTripSchema>;
+export type UpdateTripMemoSchema = z.infer<typeof updateTripMemoSchema>;

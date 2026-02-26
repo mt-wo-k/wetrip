@@ -10,6 +10,7 @@ import type { TripSchedule } from "@/lib/trips";
 type EditScheduleModalProps = {
   isOpen: boolean;
   tripId: string;
+  dayTabs: number[];
   schedule: TripSchedule | null;
   onClose: () => void;
   onUpdated: (updated: TripSchedule) => void;
@@ -18,21 +19,30 @@ type EditScheduleModalProps = {
 export function EditScheduleModal({
   isOpen,
   tripId,
+  dayTabs,
   schedule,
   onClose,
   onUpdated,
 }: EditScheduleModalProps) {
-  const [editName, setEditName] = useState("");
+  const [editDayIndex, setEditDayIndex] = useState(1);
+  const [editStartTime, setEditStartTime] = useState("");
+  const [editEndTime, setEditEndTime] = useState("");
+  const [editTitle, setEditTitle] = useState("");
   const [editDetail, setEditDetail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const isHotel = schedule?.scheduleType === "hotel";
 
   useEffect(() => {
     if (!isOpen || !schedule) {
       return;
     }
 
-    setEditName(schedule.name ?? "");
+    setEditDayIndex(schedule.dayIndex);
+    setEditStartTime(schedule.startTime);
+    setEditEndTime(schedule.endTime ?? "");
+    setEditTitle(schedule.title ?? schedule.name ?? "");
     setEditDetail(schedule.detail ?? "");
     setErrorMessage(null);
   }, [isOpen, schedule]);
@@ -57,7 +67,11 @@ export function EditScheduleModal({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: editName,
+            dayIndex: editDayIndex,
+            scheduleType: schedule.scheduleType,
+            startTime: editStartTime,
+            endTime: isHotel ? undefined : editEndTime,
+            title: editTitle,
             detail: editDetail,
           }),
         },
@@ -86,7 +100,7 @@ export function EditScheduleModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="flex flex-row items-center justify-between gap-2">
-          <CardTitle>予定を編集</CardTitle>
+          <CardTitle>{schedule?.scheduleType} を編集</CardTitle>
           <Button type="button" variant="ghost" onClick={onClose}>
             閉じる
           </Button>
@@ -94,20 +108,68 @@ export function EditScheduleModal({
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="editName">
-                予定名
+              <label className="text-sm font-medium" htmlFor="editDayIndex">
+                日にち
+              </label>
+              <select
+                id="editDayIndex"
+                value={editDayIndex}
+                onChange={(event) => setEditDayIndex(Number(event.target.value))}
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+              >
+                {dayTabs.map((day) => (
+                  <option key={day} value={day}>
+                    {day}日目
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={isHotel ? "space-y-2" : "grid gap-4 sm:grid-cols-2"}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="editStartTime">
+                  {isHotel ? "チェックイン" : "開始時間"}
+                </label>
+                <input
+                  id="editStartTime"
+                  type="time"
+                  required
+                  value={editStartTime}
+                  onChange={(event) => setEditStartTime(event.target.value)}
+                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                />
+              </div>
+              {!isHotel ? (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium" htmlFor="editEndTime">
+                    終了時間（任意）
+                  </label>
+                  <input
+                    id="editEndTime"
+                    type="time"
+                    value={editEndTime}
+                    onChange={(event) => setEditEndTime(event.target.value)}
+                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                  />
+                </div>
+              ) : null}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="editTitle">
+                タイトル
               </label>
               <input
-                id="editName"
-                value={editName}
-                onChange={(event) => setEditName(event.target.value)}
+                id="editTitle"
+                value={editTitle}
+                onChange={(event) => setEditTitle(event.target.value)}
                 className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="editDetail">
-                詳細
+                メモ
               </label>
               <textarea
                 id="editDetail"

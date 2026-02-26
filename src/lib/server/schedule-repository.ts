@@ -24,11 +24,11 @@ export async function createSchedule({
     tripId,
     scheduleId: randomUUID(),
     dayIndex: input.dayIndex,
+    scheduleType: input.scheduleType,
     startTime: input.startTime,
     endTime: input.endTime,
-    name: input.name,
+    title: input.title,
     detail: input.detail,
-    reservationStatus: input.reservationStatus,
     createdAt: now,
     updatedAt: now,
   };
@@ -85,46 +85,6 @@ export async function getSchedulesByTripId(tripId: string): Promise<TripSchedule
   });
 }
 
-export async function updateScheduleReservationStatus({
-  tripId,
-  scheduleId,
-  reservationStatus,
-}: {
-  tripId: string;
-  scheduleId: string;
-  reservationStatus: "reserved";
-}): Promise<TripSchedule> {
-  const now = new Date().toISOString();
-  const response = await dynamoDbDocumentClient.send(
-    new UpdateCommand({
-      TableName: serverEnv.dynamoDbTripSchedulesTable,
-      Key: {
-        tripId,
-        scheduleId,
-      },
-      UpdateExpression: "SET reservationStatus = :status, updatedAt = :updatedAt",
-      ExpressionAttributeValues: {
-        ":status": reservationStatus,
-        ":updatedAt": now,
-      },
-      ConditionExpression: "attribute_exists(tripId) AND attribute_exists(scheduleId)",
-      ReturnValues: "ALL_NEW",
-    }),
-  );
-
-  if (!response.Attributes) {
-    throw new Error("Schedule not found");
-  }
-
-  const validated = persistedScheduleSchema.safeParse(response.Attributes);
-
-  if (!validated.success) {
-    throw new Error("Updated schedule item shape is invalid in DynamoDB");
-  }
-
-  return validated.data;
-}
-
 export async function updateScheduleContent({
   tripId,
   scheduleId,
@@ -140,18 +100,33 @@ export async function updateScheduleContent({
 
   const expressionAttributeNames: Record<string, string> = {
     "#updatedAt": "updatedAt",
-    "#name": "name",
+    "#dayIndex": "dayIndex",
+    "#startTime": "startTime",
+    "#endTime": "endTime",
+    "#title": "title",
     "#detail": "detail",
   };
   const expressionAttributeValues: Record<string, unknown> = {
     ":updatedAt": now,
+    ":dayIndex": input.dayIndex,
+    ":startTime": input.startTime,
   };
 
-  if (input.name !== undefined) {
-    setExpressions.push("#name = :name");
-    expressionAttributeValues[":name"] = input.name;
+  setExpressions.push("#dayIndex = :dayIndex");
+  setExpressions.push("#startTime = :startTime");
+
+  if (input.endTime !== undefined) {
+    setExpressions.push("#endTime = :endTime");
+    expressionAttributeValues[":endTime"] = input.endTime;
   } else {
-    removeExpressions.push("#name");
+    removeExpressions.push("#endTime");
+  }
+
+  if (input.title !== undefined) {
+    setExpressions.push("#title = :title");
+    expressionAttributeValues[":title"] = input.title;
+  } else {
+    removeExpressions.push("#title");
   }
 
   if (input.detail !== undefined) {

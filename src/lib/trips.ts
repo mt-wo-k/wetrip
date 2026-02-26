@@ -14,17 +14,19 @@ export type CreateTripInput = Omit<
   "id" | "createdAt" | "updatedAt" | "createdBySub"
 >;
 
-export type ReservationStatus = "reserved" | "pending" | "not_required";
+export const scheduleTypeValues = ["hotel", "food", "spot", "event"] as const;
+export type ScheduleType = (typeof scheduleTypeValues)[number];
 
 export type TripSchedule = {
   tripId: string;
   scheduleId: string;
   dayIndex: number;
+  scheduleType: ScheduleType;
   startTime: string;
   endTime?: string;
+  title?: string;
   name?: string;
   detail?: string;
-  reservationStatus: ReservationStatus;
   createdAt: string;
   updatedAt: string;
 };

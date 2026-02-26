@@ -1,38 +1,98 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { Bed, CalendarClock, MapPinPen, Utensils } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TripSchedule } from "@/lib/trips";
+import type { ScheduleType, TripSchedule } from "@/lib/trips";
 
 type TripScheduleTimelineSectionProps = {
   dayTabs: number[];
   selectedDay: number;
   visibleSchedules: TripSchedule[];
-  isUpdating: boolean;
   onSelectDay: (day: number) => void;
-  onOpenAddModal: () => void;
+  onOpenAddModal: (type: ScheduleType) => void;
   onOpenEditModal: (schedule: TripSchedule) => void;
-  onMarkReserved: (scheduleId: string) => void;
+};
+
+const addTypeButtons: Array<{
+  type: ScheduleType;
+  label: string;
+  Icon: typeof Bed;
+  colorClassName: string;
+  borderClassName: string;
+}> = [
+  {
+    type: "hotel",
+    label: "hotel",
+    Icon: Bed,
+    colorClassName: "text-blue-900",
+    borderClassName: "border-blue-900",
+  },
+  {
+    type: "food",
+    label: "food",
+    Icon: Utensils,
+    colorClassName: "text-green-900",
+    borderClassName: "border-green-900",
+  },
+  {
+    type: "spot",
+    label: "spot",
+    Icon: MapPinPen,
+    colorClassName: "text-red-900",
+    borderClassName: "border-red-900",
+  },
+  {
+    type: "event",
+    label: "event",
+    Icon: CalendarClock,
+    colorClassName: "text-slate-900",
+    borderClassName: "border-slate-900",
+  },
+];
+
+const scheduleCardBorderClass: Record<ScheduleType, string> = {
+  hotel: "border-blue-900",
+  food: "border-green-900",
+  spot: "border-red-900",
+  event: "border-slate-900",
 };
 
 export function TripScheduleTimelineSection({
   dayTabs,
   selectedDay,
   visibleSchedules,
-  isUpdating,
   onSelectDay,
   onOpenAddModal,
   onOpenEditModal,
-  onMarkReserved,
 }: TripScheduleTimelineSectionProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>タイムスケジュール</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex flex-wrap gap-2">
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          {addTypeButtons.map(
+            ({ type, label, Icon, colorClassName, borderClassName }) => (
+              <Button
+                key={type}
+                type="button"
+                variant="outline"
+                className={`h-auto min-w-16 flex-col gap-1 border-2 px-3 py-1 ${colorClassName} ${borderClassName}`}
+                onClick={() => onOpenAddModal(type)}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="text-[11px] leading-none">{label}</span>
+              </Button>
+            )
+          )}
+        </div>
+
+        <div className="border w-full border-border"></div>
+
+        <div className="flex flex-wrap gap-2 px-2">
           {dayTabs.map((day) => (
             <Button
               key={day}
@@ -46,20 +106,17 @@ export function TripScheduleTimelineSection({
           ))}
         </div>
 
-        <div>
-          <Button type="button" onClick={onOpenAddModal}>
-            予定追加
-          </Button>
-        </div>
-
-        <div className="space-y-4">
+        <div className="space-y-4 py-3">
           {visibleSchedules.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {selectedDay}日目の予定はまだありません。
             </p>
           ) : (
             visibleSchedules.map((item, index) => (
-              <div key={item.scheduleId} className="grid grid-cols-[24px_1fr] gap-4">
+              <div
+                key={item.scheduleId}
+                className="grid grid-cols-[24px_1fr] gap-4"
+              >
                 <div className="relative">
                   {index === 0 ? (
                     <span className="absolute left-1/2 top-[-6px] h-[6px] w-[2px] -translate-x-1/2 bg-border" />
@@ -73,44 +130,36 @@ export function TripScheduleTimelineSection({
                   />
                   <span className="absolute left-1/2 top-2 z-10 h-3 w-3 -translate-x-1/2 rounded-full bg-[#8F1D3F]" />
                 </div>
-                <div className="space-y-2 pb-6">
-                  <p className="text-sm font-semibold text-muted-foreground">
-                    {item.endTime ? `${item.startTime}〜${item.endTime}` : item.startTime}
-                  </p>
+                <div className="space-y-2 pb-4">
                   <button
                     type="button"
                     onClick={() => onOpenEditModal(item)}
-                    className="w-full rounded-md border border-border bg-background p-3 text-left hover:bg-muted/40"
+                    className={`relative w-full rounded-md border-2 bg-background p-3 text-left hover:bg-muted/40 ${
+                      scheduleCardBorderClass[item.scheduleType]
+                    }`}
                   >
+                    <p
+                      className={`absolute -top-3 left-2 rounded-full border-2 bg-background px-2 text-sm font-semibold text-muted-foreground ${
+                        scheduleCardBorderClass[item.scheduleType]
+                      }`}
+                    >
+                      {item.endTime
+                        ? `${item.startTime}〜${item.endTime}`
+                        : item.startTime}
+                    </p>
                     <p className="text-base font-semibold">
-                      {item.name?.trim() || "予定（タップして編集）"}
+                      {item.title?.trim() || item.name?.trim() || item.scheduleType}
                     </p>
                     {item.detail ? (
-                      <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                      <p className="whitespace-pre-wrap text-xs text-muted-foreground pl-1">
                         {item.detail}
                       </p>
                     ) : (
-                      <p className="text-sm text-muted-foreground">
-                        詳細なし（タップして編集）
+                      <p className="text-xs text-muted-foreground">
+                        メモなし（タップして編集）
                       </p>
                     )}
                   </button>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {item.reservationStatus === "reserved" ? (
-                      <Badge variant="secondary">予約済</Badge>
-                    ) : (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={isUpdating}
-                        onClick={() => onMarkReserved(item.scheduleId)}
-                      >
-                        予約済みにする
-                      </Button>
-                    )}
-                  </div>
                 </div>
               </div>
             ))

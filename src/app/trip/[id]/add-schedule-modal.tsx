@@ -5,16 +5,14 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ReservationStatus, TripSchedule } from "@/lib/trips";
-
-type ReservationOption = { value: ReservationStatus; label: string };
+import type { ScheduleType, TripSchedule } from "@/lib/trips";
 
 type AddScheduleModalProps = {
   isOpen: boolean;
   tripId: string;
   dayTabs: number[];
+  scheduleType: ScheduleType | null;
   initialDayIndex: number;
-  reservationOptions: ReservationOption[];
   onClose: () => void;
   onCreated: (created: TripSchedule) => void;
 };
@@ -23,37 +21,42 @@ export function AddScheduleModal({
   isOpen,
   tripId,
   dayTabs,
+  scheduleType,
   initialDayIndex,
-  reservationOptions,
   onClose,
   onCreated,
 }: AddScheduleModalProps) {
   const [dayIndex, setDayIndex] = useState(initialDayIndex);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
-  const [reservationStatus, setReservationStatus] =
-    useState<ReservationStatus>("pending");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const isHotel = scheduleType === "hotel";
+
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || !scheduleType) {
       return;
     }
 
     setDayIndex(initialDayIndex);
     setStartTime("");
     setEndTime("");
-    setName("");
+    setTitle("");
     setDetail("");
-    setReservationStatus("pending");
     setErrorMessage(null);
-  }, [isOpen, initialDayIndex]);
+  }, [isOpen, initialDayIndex, scheduleType]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!scheduleType) {
+      setErrorMessage("種別が選択されていません");
+      return;
+    }
+
     setErrorMessage(null);
     setIsSubmitting(true);
 
@@ -65,11 +68,11 @@ export function AddScheduleModal({
         },
         body: JSON.stringify({
           dayIndex,
+          scheduleType,
           startTime,
-          endTime,
-          name,
+          endTime: isHotel ? undefined : endTime,
+          title,
           detail,
-          reservationStatus,
         }),
       });
 
@@ -88,7 +91,7 @@ export function AddScheduleModal({
     }
   }
 
-  if (!isOpen) {
+  if (!isOpen || !scheduleType) {
     return null;
   }
 
@@ -96,56 +99,37 @@ export function AddScheduleModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="flex flex-row items-center justify-between gap-2">
-          <CardTitle>予定を追加</CardTitle>
+          <CardTitle>{scheduleType} を追加</CardTitle>
           <Button type="button" variant="ghost" onClick={onClose}>
             閉じる
           </Button>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="dayIndex">
-                  日にち（n日目）
-                </label>
-                <select
-                  id="dayIndex"
-                  value={dayIndex}
-                  onChange={(event) => setDayIndex(Number(event.target.value))}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
-                >
-                  {dayTabs.map((day) => (
-                    <option key={day} value={day}>
-                      {day}日目
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="reservationStatus">
-                  予約
-                </label>
-                <select
-                  id="reservationStatus"
-                  value={reservationStatus}
-                  onChange={(event) =>
-                    setReservationStatus(event.target.value as ReservationStatus)
-                  }
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
-                >
-                  {reservationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="dayIndex">
+                日にち
+              </label>
+              <select
+                id="dayIndex"
+                value={dayIndex}
+                onChange={(event) => setDayIndex(Number(event.target.value))}
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+              >
+                {dayTabs.map((day) => (
+                  <option key={day} value={day}>
+                    {day}日目
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div
+              className={isHotel ? "space-y-2" : "grid gap-4 sm:grid-cols-2"}
+            >
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="startTime">
-                  開始時間
+                  {isHotel ? "チェックイン" : "開始時間"}
                 </label>
                 <input
                   id="startTime"
@@ -156,35 +140,37 @@ export function AddScheduleModal({
                   className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="endTime">
-                  終了時間（任意）
-                </label>
-                <input
-                  id="endTime"
-                  type="time"
-                  value={endTime}
-                  onChange={(event) => setEndTime(event.target.value)}
-                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
-                />
-              </div>
+              {!isHotel ? (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium" htmlFor="endTime">
+                    終了時間（任意）
+                  </label>
+                  <input
+                    id="endTime"
+                    type="time"
+                    value={endTime}
+                    onChange={(event) => setEndTime(event.target.value)}
+                    className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="name">
-                予定名
+              <label className="text-sm font-medium" htmlFor="title">
+                タイトル
               </label>
               <input
-                id="name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
+                id="title"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
                 className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm"
               />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="detail">
-                詳細
+                メモ
               </label>
               <textarea
                 id="detail"
@@ -194,11 +180,13 @@ export function AddScheduleModal({
               />
             </div>
 
-            {errorMessage ? <p className="text-sm text-red-500">{errorMessage}</p> : null}
+            {errorMessage ? (
+              <p className="text-sm text-red-500">{errorMessage}</p>
+            ) : null}
 
             <div className="flex gap-2">
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "追加中..." : "予定を追加"}
+                {isSubmitting ? "追加中..." : "追加する"}
               </Button>
               <Button type="button" variant="outline" onClick={onClose}>
                 キャンセル

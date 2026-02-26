@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTrips } from "@/lib/server/trip-repository";
+import { formatDateForDisplay } from "@/lib/utils";
 
 export default async function Home() {
   const trips = await getTrips();
@@ -35,7 +36,8 @@ export default async function Home() {
               <h2 className="text-lg font-semibold">{trip.destination}</h2>
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  {trip.startDate} ~ {trip.endDate}
+                  {formatDateForDisplay(trip.startDate)} ~{" "}
+                  {formatDateForDisplay(trip.endDate)}
                 </p>
                 <Badge variant="secondary">{trip.transportation}</Badge>
               </div>
